@@ -1,0 +1,6 @@
+path: /Users/giovanafurlan/Documents/GitHub/vision-guard-ai/sharp_objects_dataset
+train: /Users/giovanafurlan/Documents/GitHub/vision-guard-ai/sharp_objects_dataset/images/train
+val: /Users/giovanafurlan/Documents/GitHub/vision-guard-ai/sharp_objects_dataset/images/test
+
+nc: 1  # Number of classes (e.g., sharp objects)
+names: ["sharp_object"]
