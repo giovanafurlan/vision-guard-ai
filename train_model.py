@@ -1,38 +1,62 @@
+import os
+import yaml
 from ultralytics import YOLO
 
-# Train YOLOv5 model with enhancements
+# Definir o caminho base do dataset
+BASE_PATH = r"C:\git\Postech\Hackaton\vision-guard-ai-main"
+
+# Criar dinamicamente o arquivo de configuração do dataset
+def create_dataset_yaml():
+    dataset_yaml_path = os.path.join(BASE_PATH, "sharp_objects_dataset", "dataset.yaml")
+    
+    dataset_info = {
+        "path": os.path.join(BASE_PATH, "sharp_objects_dataset"),
+        "train": os.path.join(BASE_PATH, "sharp_objects_dataset", "images", "train"),
+        "val": os.path.join(BASE_PATH, "sharp_objects_dataset", "images", "test"),
+        "nc": 1,  # Número de classes
+        "names": ["sharp_object"]  # Nome das classes
+    }
+
+    with open(dataset_yaml_path, "w") as f:
+        yaml.dump(dataset_info, f, default_flow_style=False)
+
+    return dataset_yaml_path
+
+# Função para treinar o modelo YOLOv8
 def train_model():
-    # Load pretrained YOLOv5s model
-    model = YOLO('yolov5s.pt')
+    # Criar o arquivo .yaml dinamicamente
+    dataset_yaml = create_dataset_yaml()
 
-    # Visualize dataset before training
-    print("Validating dataset structure...")
-    model.val(data='/Users/giovanafurlan/Documents/GitHub/vision-guard-ai/sharp_objects_dataset/sharp_objects_dataset.yaml', plots=True)
+    # Carregar o modelo pré-treinado YOLOv8
+    model = YOLO("yolov8x.pt")
 
-    # Start training with enhanced configuration
+    # Validar dataset antes do treinamento
+    print("Validando a estrutura do dataset...")
+    model.val(data=dataset_yaml, plots=True)
+
+    # Iniciar treinamento
     model.train(
-        data='/Users/giovanafurlan/Documents/GitHub/vision-guard-ai/sharp_objects_dataset/sharp_objects_dataset.yaml',  # Path to YAML file
-        epochs=40,  # Increase number of epochs for better convergence
-        imgsz=640,  # Image size
-        batch=16,  # Batch size
-        freeze=[0],  # Freeze backbone layers to focus on detection layers
-        close_mosaic=10,  # Stop mosaic augmentation after 10 epochs
-        lr0=0.001,  # Lower learning rate to prevent overshooting
+        data=dataset_yaml,  
+        epochs=40,  
+        imgsz=640,  
+        batch=16,  
+        freeze=0,  
+        lr=0.001,  
     )
 
-    # Save the best model
-    print("Training completed. Saving the model...")
-    model.export(format="torchscript")  # Export trained model in TorchScript format
+    # Exportar modelo treinado
+    print("Treinamento concluído. Salvando o modelo...")
+    model.export(format="onnx")  
 
     return model
 
-
-# Run training
+# Executar treinamento
 if __name__ == "__main__":
     trained_model = train_model()
 
-    # Test the trained model on an example image
-    print("Testing the model on a sample image...")
-    results = trained_model('/Users/giovanafurlan/Documents/GitHub/vision-guard-ai/sharp_objects_dataset/images/test/sample_image.jpg', conf=0.1)
-    results.save()  # Save prediction results
-    print("Predictions saved!")
+    # Testar modelo treinado em uma imagem
+    print("Testando o modelo em uma imagem de exemplo...")
+    test_image = os.path.join(BASE_PATH, "sharp_objects_dataset", "images", "test", "sample_image.jpg")
+    results = trained_model(test_image, conf=0.1)
+    results.save()  
+    print("Previsões salvas!")

@@ -2,7 +2,14 @@ import cv2
 from ultralytics import YOLO
 import os
 
-def process_video_with_prints(video_path, output_path, model_path='runs/train/exp/weights/best.pt', skip_frames=5):
+# Definir caminho base para facilitar mudanças futuras
+BASE_PATH = r"C:\git\Postech\Hackaton\vision-guard-ai-main"
+
+def process_video_with_prints(video_path, output_path, model_path=None, skip_frames=5):
+    # Definir o caminho do modelo, se não for passado
+    if model_path is None:
+        model_path = os.path.join(BASE_PATH, "runs", "detect", "train", "weights", "best.pt")
+
     # Load the trained YOLO model
     model = YOLO(model_path)
     
@@ -62,17 +69,18 @@ def process_video_with_prints(video_path, output_path, model_path='runs/train/ex
     print(f"Prints saved to {prints_dir}")
 
 if __name__ == "__main__":
-    video_path = "input_video.mp4"  # Replace with your video file path
-    output_path = "output"  # Replace with your desired output directory
-    model_path = "/Users/giovanafurlan/Documents/GitHub/vision-guard-ai/runs/detect/train/weights/best.pt"  # Path to the trained YOLO model
+    # Caminhos ajustados para o novo ambiente
+    video_path = os.path.join(BASE_PATH, "input_video.mp4")  # Substitua pelo nome real do vídeo
+    output_path = os.path.join(BASE_PATH, "output")
+    model_path = os.path.join(BASE_PATH, "runs", "detect", "train", "weights", "best.pt")
 
-    # Create output directory if it doesn't exist
+    # Criar diretório de saída, se necessário
     os.makedirs(output_path, exist_ok=True)
 
-    # Run the function
+    # Executar a função
     process_video_with_prints(
         video_path=video_path,
         output_path=output_path,
         model_path=model_path,
-        skip_frames=5  # Adjust frame skipping as needed
+        skip_frames=5  # Ajuste conforme necessário
     )
